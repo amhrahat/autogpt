@@ -1,0 +1,288 @@
+{
+  "info": {
+    "name": "EchoGPT API",
+    "description": "Postman collection for the EchoGPT backend. Set {{baseUrl}} (default http://localhost:3001/api/v1). Login first — the access token is stored automatically.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:3001/api/v1" },
+    { "key": "accessToken", "value": "" },
+    { "key": "refreshToken", "value": "" },
+    { "key": "providerId", "value": "" },
+    { "key": "conversationId", "value": "" }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [{ "key": "token", "value": "{{accessToken}}", "type": "string" }]
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const d = pm.response.json();",
+                  "pm.collectionVariables.set('accessToken', d.accessToken);",
+                  "pm.collectionVariables.set('refreshToken', d.refreshToken);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\":\"user@example.com\",\"password\":\"Passw0rd123\",\"name\":\"Test User\"}"
+            },
+            "url": "{{baseUrl}}/auth/register"
+          }
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const d = pm.response.json();",
+                  "pm.collectionVariables.set('accessToken', d.accessToken);",
+                  "pm.collectionVariables.set('refreshToken', d.refreshToken);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\":\"user@example.com\",\"password\":\"Passw0rd123\"}"
+            },
+            "url": "{{baseUrl}}/auth/login"
+          }
+        },
+        {
+          "name": "Refresh",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const d = pm.response.json();",
+                  "pm.collectionVariables.set('accessToken', d.accessToken);",
+                  "pm.collectionVariables.set('refreshToken', d.refreshToken);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\"refreshToken\":\"{{refreshToken}}\"}" },
+            "url": "{{baseUrl}}/auth/refresh"
+          }
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\"refreshToken\":\"{{refreshToken}}\"}" },
+            "url": "{{baseUrl}}/auth/logout"
+          }
+        },
+        { "name": "Me", "request": { "method": "GET", "url": "{{baseUrl}}/auth/me" } }
+      ]
+    },
+    {
+      "name": "User",
+      "item": [
+        { "name": "Get profile", "request": { "method": "GET", "url": "{{baseUrl}}/user/me" } },
+        {
+          "name": "Update profile",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\"name\":\"New Name\"}" },
+            "url": "{{baseUrl}}/user/me"
+          }
+        },
+        {
+          "name": "Change password",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"currentPassword\":\"Passw0rd123\",\"newPassword\":\"NewPassw0rd123\"}"
+            },
+            "url": "{{baseUrl}}/user/me/password"
+          }
+        },
+        { "name": "Delete account", "request": { "method": "DELETE", "url": "{{baseUrl}}/user/me" } }
+      ]
+    },
+    {
+      "name": "AI Providers",
+      "item": [
+        {
+          "name": "List providers",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const d = pm.response.json();",
+                  "if (Array.isArray(d) && d.length) pm.collectionVariables.set('providerId', d[0].id);"
+                ]
+              }
+            }
+          ],
+          "request": { "method": "GET", "url": "{{baseUrl}}/providers" }
+        },
+        {
+          "name": "Create provider",
+          "event": [
+            {
+              "listen": "test",
+              "script": { "exec": ["pm.collectionVariables.set('providerId', pm.response.json().id);"] }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\":\"My OpenAI\",\"type\":\"openai\",\"baseUrl\":\"https://api.openai.com/v1\",\"apiKey\":\"sk-your-key-here\",\"model\":\"gpt-4o-mini\",\"isDefault\":true}"
+            },
+            "url": "{{baseUrl}}/providers"
+          }
+        },
+        {
+          "name": "Health check",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/providers/{{providerId}}/health"
+          }
+        },
+        {
+          "name": "Update provider",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\"isEnabled\":false}" },
+            "url": "{{baseUrl}}/providers/{{providerId}}"
+          }
+        },
+        {
+          "name": "Delete provider",
+          "request": { "method": "DELETE", "url": "{{baseUrl}}/providers/{{providerId}}" }
+        }
+      ]
+    },
+    {
+      "name": "Chat",
+      "item": [
+        {
+          "name": "Send message",
+          "event": [
+            {
+              "listen": "test",
+              "script": { "exec": ["pm.collectionVariables.set('conversationId', pm.response.json().conversationId);"] }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"content\":\"Hello!\",\"providerId\":\"{{providerId}}\"}"
+            },
+            "url": "{{baseUrl}}/chat/messages"
+          }
+        },
+        { "name": "List conversations", "request": { "method": "GET", "url": "{{baseUrl}}/chat/conversations" } },
+        {
+          "name": "Conversation messages",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/chat/conversations/{{conversationId}}/messages"
+          }
+        },
+        {
+          "name": "Rename conversation",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\"title\":\"Renamed\"}" },
+            "url": "{{baseUrl}}/chat/conversations/{{conversationId}}"
+          }
+        },
+        {
+          "name": "Delete conversation",
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrl}}/chat/conversations/{{conversationId}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Subscription",
+      "item": [
+        { "name": "My subscription", "request": { "method": "GET", "url": "{{baseUrl}}/subscription/me" } },
+        {
+          "name": "Change plan",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\"plan\":\"PRO\"}" },
+            "url": "{{baseUrl}}/subscription/me/plan"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Web Search",
+      "item": [
+        {
+          "name": "Search",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\"query\":\"nestjs prisma\",\"limit\":5}" },
+            "url": "{{baseUrl}}/search"
+          }
+        },
+        { "name": "History", "request": { "method": "GET", "url": "{{baseUrl}}/search/history" } },
+        { "name": "Recent", "request": { "method": "GET", "url": "{{baseUrl}}/search/recent" } },
+        {
+          "name": "Suggestions",
+          "request": { "method": "GET", "url": "{{baseUrl}}/search/suggestions?q=nestjs" }
+        }
+      ]
+    },
+    {
+      "name": "Admin",
+      "item": [
+        { "name": "Dashboard", "request": { "method": "GET", "url": "{{baseUrl}}/admin/dashboard" } },
+        { "name": "List users", "request": { "method": "GET", "url": "{{baseUrl}}/admin/users" } },
+        { "name": "Usage analytics", "request": { "method": "GET", "url": "{{baseUrl}}/admin/analytics/usage?days=30" } },
+        { "name": "Top users", "request": { "method": "GET", "url": "{{baseUrl}}/admin/analytics/top-users" } },
+        { "name": "Request logs", "request": { "method": "GET", "url": "{{baseUrl}}/admin/logs" } },
+        { "name": "System health", "request": { "method": "GET", "url": "{{baseUrl}}/admin/health" } },
+        { "name": "Subscriptions", "request": { "method": "GET", "url": "{{baseUrl}}/admin/subscriptions" } }
+      ]
+    }
+  ]
+}
