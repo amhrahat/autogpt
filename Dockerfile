@@ -1,6 +1,8 @@
 # ---- build stage ----
-FROM node:18-alpine AS build
+FROM node:18-slim AS build
 WORKDIR /app
+
+RUN apt-get update -y && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
 
 COPY package*.json ./
 COPY prisma ./prisma
@@ -14,9 +16,11 @@ RUN npx prisma generate && npm run build
 RUN npm prune --omit=dev
 
 # ---- runtime stage ----
-FROM node:18-alpine
+FROM node:18-slim
 WORKDIR /app
 ENV NODE_ENV=production
+
+RUN apt-get update -y && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
 
 COPY --from=build /app/node_modules ./node_modules
 COPY --from=build /app/dist ./dist
@@ -24,4 +28,4 @@ COPY --from=build /app/prisma ./prisma
 COPY --from=build /app/package.json ./package.json
 
 EXPOSE 3000
-CMD ["node", "dist/main.js"]
+CMD ["sh", "-c", "npx prisma migrate deploy && node dist/prisma/seed.js && node dist/src/main.js"]

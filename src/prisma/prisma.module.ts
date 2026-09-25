@@ -1,7 +1,6 @@
 import { Global, Injectable, Module, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
 
-@Global()
 @Injectable()
 export class PrismaService extends PrismaClient implements OnModuleInit, OnModuleDestroy {
   async onModuleInit() {
@@ -13,6 +12,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
   }
 }
 
+@Global()
 @Module({
   providers: [PrismaService],
   exports: [PrismaService],

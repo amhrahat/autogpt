@@ -7,7 +7,7 @@ services:
       POSTGRES_PASSWORD: echogpt_password
       POSTGRES_DB: echogpt
     ports:
-      - '5432:5432'
+      - '5433:5432'
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
@@ -36,8 +36,8 @@ services:
       ADMIN_PASSWORD: ${ADMIN_PASSWORD:-ChangeMe123!}
       ADMIN_NAME: ${ADMIN_NAME:-Admin}
     ports:
-      - '3000:3000'
-    command: sh -c "npx prisma migrate deploy && npx ts-node prisma/seed.ts && node dist/main.js"
+      - '3001:3000'
+    command: sh -c "npx prisma migrate deploy && node dist/prisma/seed.js && node dist/src/main.js"
 
 volumes:
   pgdata:
