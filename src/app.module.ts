@@ -10,6 +10,7 @@ import { AiProviderModule } from './ai-provider/ai-provider.module';
 import { ChatModule } from './chat/chat.module';
 import { SubscriptionModule } from './subscription/subscription.module';
 import { WebSearchModule } from './web-search/web-search.module';
+import { AdminModule } from './admin/admin.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { WebSearchModule } from './web-search/web-search.module';
     ChatModule,
     SubscriptionModule,
     WebSearchModule,
+    AdminModule,
   ],
   providers: [
     // global rate limiting; per-route decorators tighten it
