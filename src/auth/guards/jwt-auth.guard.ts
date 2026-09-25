@@ -5,8 +5,9 @@ import { AuthGuard } from '@nestjs/passport';
 export const IS_PUBLIC_KEY = 'isPublic';
 export const Public = () => SetMetadata(IS_PUBLIC_KEY, true);
 
-export const ROLES_KEY = 'roles';
-export const Roles = (...roles: string[]) => SetMetadata(ROLES_KEY, roles);
+// ROLES_KEY lives in roles.guard.ts; re-exported for convenience
+export { ROLES_KEY } from './roles.guard';
+export const Roles = (...roles: string[]) => SetMetadata('roles', roles);
 
 @Injectable()
 export class JwtAuthGuard extends AuthGuard('jwt') {

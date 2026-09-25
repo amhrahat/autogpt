@@ -8,6 +8,7 @@ import { AiProvider, Conversation } from '@prisma/client';
 import { CryptoService } from '../common/crypto/crypto.service';
 import { PrismaService } from '../prisma/prisma.module';
 import { AiProviderService } from '../ai-provider/ai-provider.service';
+import { SubscriptionService } from '../subscription/subscription.service';
 import { SendMessageDto } from './dto/chat.dto';
 import { AiProviderClient, ChatCompletionResult } from './providers/ai-provider.client';
 import { AnthropicClient } from './providers/anthropic.client';
@@ -23,6 +24,7 @@ export class ChatService {
     private prisma: PrismaService,
     private crypto: CryptoService,
     private providerService: AiProviderService,
+    private subscriptionService: SubscriptionService,
     anthropicClient: AnthropicClient,
     openAiCompatibleClient: OpenAiCompatibleClient,
   ) {
@@ -80,6 +82,7 @@ export class ChatService {
    * recent history → persist assistant reply → return both.
    */
   async send(userId: string, dto: SendMessageDto): Promise<ChatCompletionResult & { conversationId: string }> {
+    await this.subscriptionService.assertWithinQuota(userId);
     const provider = await this.resolveProvider(userId, dto.providerId);
     const client = this.clients[provider.type];
     if (!client) {
@@ -146,6 +149,8 @@ export class ChatService {
       where: { id: conversation.id },
       data: { updatedAt: new Date() },
     });
+
+    await this.subscriptionService.incrementUsage(userId);
 
     await this.prisma.apiUsageLog.create({
       data: {

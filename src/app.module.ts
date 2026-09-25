@@ -8,6 +8,7 @@ import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
 import { AiProviderModule } from './ai-provider/ai-provider.module';
 import { ChatModule } from './chat/chat.module';
+import { SubscriptionModule } from './subscription/subscription.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { ChatModule } from './chat/chat.module';
     UserModule,
     AiProviderModule,
     ChatModule,
+    SubscriptionModule,
   ],
   providers: [
     // global rate limiting; per-route decorators tighten it
